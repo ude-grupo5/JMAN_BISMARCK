@@ -1,8 +1,13 @@
-import EstadoPartida from './EstadoPartida.js';
+import Partida from './Partida.js';
 
 export default class VistaLateral {
 
-  /**
+    static get ESCALADO_BISMARCK () { return 0.15; }
+    static get ESCALADO_HOOD () { return 0.15; }
+    static get DAMPING_BARCO () { return 0.8; }
+
+
+    /**
      * Constructor
      * @param {Phaser.Game} lateral El juego con vista lateral
      */
@@ -19,7 +24,6 @@ export default class VistaLateral {
         // animaciones
         this.explosiones = null;
 
-
     }
 
     /*************************************************************************
@@ -34,8 +38,9 @@ export default class VistaLateral {
     create() {
         this.deshabilitarPerdidaFoco();
         this.crearFondo();
-        this.crearAgua();
+        this.crearOlas();
         this.crearNubes();
+        this.crearLluvia();
         this.crearBarcos();  
     }
 
@@ -54,7 +59,7 @@ export default class VistaLateral {
     cargarImagenes() {
         this.lateral.load.image('escenarioLateral', 'sprites/lateral.png');
         this.lateral.load.spritesheet('nube', 'sprites/nube.png',64,128);
-        this.lateral.load.image('Bismark_lateral', 'sprites/Bismarck/Bismarck_frontal.png');
+        this.lateral.load.image('BismarkProa', 'sprites/Bismarck/proa_bismarck.png');
         this.lateral.load.image('HoodLateral','sprites/Hood/Hood_lateral_izquierda.png')
         this.lateral.load.spritesheet('oceano', 'sprites/agua.png', 32, 400, 32);
     }
@@ -73,7 +78,7 @@ export default class VistaLateral {
 
     crearBarcos() {
         // bismarck
-        let barco = this.lateral.add.sprite(this.lateral.world.centerX, this.lateral.height-230,'Bismark_lateral');
+        let barco = this.lateral.add.sprite(90, 302,'BismarkProa');
         barco.scale.setTo(1.0,1.0);
 
         let barco2 = this.lateral.add.sprite(50, this.lateral.height-230,'HoodLateral');
@@ -81,7 +86,7 @@ export default class VistaLateral {
 
     }
 
-    crearAgua(){
+    crearOlas(){
     
         let horizonte = this.lateral.add.tileSprite(0, 295, 128 * 16, 100,'oceano');
         let agua = this.lateral.add.tileSprite(0, 300, 128 * 16, 200,'oceano');
@@ -94,7 +99,6 @@ export default class VistaLateral {
         horizonte.animations.add('horizonte', [16, 17, 18, 19, 18, 17]);
         
     }
-
 
     crearNubes(){
 
@@ -115,6 +119,34 @@ export default class VistaLateral {
      nubeConRayo3.animations.add('nr3',[1,2,3])
      nubeConRayo3.animations.play('nr3', 2, true);
      
+    }
+
+    crearLluvia(){
+
+        let gotas = this.lateral.add.bitmapData(15, 50);
+
+        gotas.ctx.rect(0, 5, 5, 20);
+        gotas.ctx.fillStyle = '#9cc9de';
+        gotas.ctx.fill();
+
+        this.emisor = this.lateral.add.emitter(this.lateral.world.centerX, -300, 400);
+
+        this.emisor.width = this.lateral.world.width;
+        this.emisor.angle = 25;
+
+        this.emisor.makeParticles(gotas);
+
+        this.emisor.minParticleScale = 0.1;
+        this.emisor.maxParticleScale = 0.7;
+
+        this.emisor.setYSpeed(600, 1000);
+        this.emisor.setXSpeed(-5, 5);
+
+        this.emisor.minRotation = 0;
+        this.emisor.maxRotation = 0;
+
+        this.emisor.start(false, 1600, 5, 0);
+
     }
 
     /*************************************************************************
