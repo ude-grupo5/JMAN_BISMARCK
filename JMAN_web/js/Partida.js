@@ -5,6 +5,7 @@ import Bala from './Bala.js';
 import Canion from './Canion.js';
 import Geometria from './util/Geometria.js';
 import MenuPausa from './MenuPausa.js';
+import VistaLateral from './VistaLateral.js';
 
 export default class Partida {
 
@@ -28,6 +29,9 @@ export default class Partida {
 
         this.juego = juego;
 
+        //vista lateral
+        lateral = new Phaser.Game(450, 450, Phaser.AUTO,'lateral');
+        
         // websockets
         this.websocket = null;
 
@@ -61,6 +65,9 @@ export default class Partida {
         // menu pausa
         this.menuPausa = null;
 
+        // vista lateral
+        this.vistaLateral = null;
+        
         // controles
         this.controles = null;
 
@@ -83,6 +90,7 @@ export default class Partida {
     }
 
     create() {
+        
         this.deshabilitarPerdidaFoco();
         this.iniciarFisica();
 
@@ -92,12 +100,14 @@ export default class Partida {
 
         this.crearExplosiones();
 
+        //this.crearMusicaFondo();
         this.crearSonidos();
         
         this.crearBarcos();
         this.setearColisionBarcos();
         this.asignarBarcos();
-        
+        this.obtenerNombre();
+
         this.crearArmas();
 
         this.crearNiebla();
@@ -110,6 +120,10 @@ export default class Partida {
 
         this.crearControles();
         this.crearCamaras();
+
+        //Vista lateral
+        this.crearVistaLateral();
+        
     }
 
     update() {
@@ -163,9 +177,6 @@ export default class Partida {
 
     conectarWebsocket() {
         let host = document.location.host;
-        //let pathname = document.location.pathname;
-    
-        //this.websocket = new WebSocket("ws://" +host  + pathname + "partida/");
         this.websocket = new WebSocket("ws://" + host  + "/websockets/partida/");
         this.websocket.partida = this;
     
@@ -315,6 +326,12 @@ export default class Partida {
         }
     }
 
+    crearMusicaFondo() {
+        let SonidoAmbiente = this.juego.add.audio('ambiente');
+        SonidoAmbiente.loopFull();
+    }
+
+
     crearSpriteAnimado(nombreSpriteSheet) {
         let sprite = this.juego.add.sprite(0, 0, nombreSpriteSheet);
         sprite.anchor.x = 0.5;
@@ -430,6 +447,7 @@ export default class Partida {
         if (barcoElegido == "Bismarck") {
             this.barcoJugador = this.bismarck;
             this.barcoEnemigo = this.hood;
+            
         } else if (barcoElegido == "Hood") {
             this.barcoJugador = this.hood;
             this.barcoEnemigo = this.bismarck;
@@ -689,5 +707,15 @@ export default class Partida {
         let json = JSON.stringify(objeto);
         this.websocket.send(json);
     }
-    
+
+
+    // ########################################################################
+    //    FUNCIONES PARA VISTA LATERAL
+    // ########################################################################
+
+    crearVistaLateral(){
+        lateral.state.add('JuegoLateral',new VistaLateral(lateral,this.barcoJugador,this.barcoEnemigo));
+        lateral.state.start('JuegoLateral');    
+    }
+   
 }
